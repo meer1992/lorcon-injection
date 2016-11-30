@@ -112,6 +112,7 @@ int main(int argc, char** argv)
 		/* Get start time */
 		clock_gettime(CLOCK_MONOTONIC, &start);
 	}
+loop_inject:
 	for (i = 0; i < num_packets; ++i) {
 		payload_memcpy(packet->payload, packet_size,
 				(i*packet_size) % PAYLOAD_SIZE);
@@ -141,6 +142,9 @@ int main(int argc, char** argv)
 			fflush(stdout);
 		}
 	}
+    if (num_packets == (uint32_t)-1) {
+        goto loop_inject;
+    }
 
 	return 0;
 }
