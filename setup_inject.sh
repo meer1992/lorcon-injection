@@ -12,10 +12,12 @@ if [ $? -eq 0 ]; then
     echo "Reloading iwl driver"
     modprobe -r iwldvm iwlwifi mac80211 cfg80211
     modprobe iwlwifi debug=0x40000
-    ifconfig $IFACE >/dev/null 2>&1
+    #ifconfig $IFACE >/dev/null 2>&1
+    ip link show $IFACE >/dev/null 2>&1
     while [ $? -ne 0 ]
     do
-        ifconfig $IFACE >/dev/null 2>&1
+        #ifconfig $IFACE >/dev/null 2>&1
+        ip link show $IFACE >/dev/null 2>&1
     done
 fi
 
@@ -32,28 +34,34 @@ if [ $? -ne 0 ]; then
 fi
 
 # activate mon0 if not
-ifconfig mon0 >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+#ifconfig mon0 >/dev/null 2>&1
+#if [ $? -ne 0 ]; then
+ip link show mon0 | grep -i down >/dev/null 2>&1
+if [ $? -eq 0 ]; then
     echo "Activating monitor interface"
-    ifconfig mon0 up
-    ifconfig mon0 >/dev/null 2>&1
-    while [ $? -ne 0 ]
+    #ifconfig mon0 up
+    ip link set mon0 up
+    #ifconfig mon0 >/dev/null 2>&1
+    #while [ $? -ne 0 ]
+    ip link show mon0 | grep -i down >/dev/null 2>&1
+    while [ $? -eq 0 ]
     do
-        ifconfig mon0 >/dev/null 2>&1
+        #ifconfig mon0 >/dev/null 2>&1
+        ip link show mon0 | grep -i down >/dev/null 2>&1
     done
 fi
 
-iw $IFACE info >/dev/null 2>&1
+iw dev $IFACE info >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "Deleting managed interface"
-    iw $IFACE del
+    iw dev $IFACE del
 fi
 
 # set channel and frequency
 channel=$(./channel.sh)
 if [ "$channel" -ne $1 ]; then
     echo "Setting channel and frequency"
-    iw mon0 set channel $1 $2
+    iw dev mon0 set channel $1 $2
     channel=$(./channel.sh)
     while [ "$channel" -ne 1 ]
     do
