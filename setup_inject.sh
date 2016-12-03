@@ -1,11 +1,14 @@
 #!/usr/bin/sudo /bin/bash
 
-IFACE=wlp1s0
-
-if [ $# -ne 2 ]; then
-    echo "Usage: ./setup_inject.sh <channel> {HT20|HT40-|HT40+}"
+if [ $# -ne 4 ]; then
+    echo "Usage: ./setup_inject.sh <interface> <monitor_iface> <channel> {HT20|HT40-|HT40+}"
     exit
 fi
+
+IFACE=$1
+MONITOR=$2
+CHANNEL=$3
+MODE=$4
 
 lsmod | grep iwl >/dev/null 2>&1
 if [ $? -eq 0 ]; then
@@ -21,33 +24,33 @@ if [ $? -eq 0 ]; then
     done
 fi
 
-# create mon0 if not exist
-ip link show mon0 >/dev/null 2>&1
+# create $MONITOR if not exist
+ip link show $MONITOR >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Creating monitor interface"
-    iw dev $IFACE interface add mon0 type monitor
-    ip link show mon0 >/dev/null 2>&1
+    iw dev $IFACE interface add $MONITOR type monitor
+    ip link show $MONITOR >/dev/null 2>&1
     while [ $? -ne 0 ]
     do
-        ip link show mon0 >/dev/null 2>&1
+        ip link show $MONITOR >/dev/null 2>&1
     done
 fi
 
-# activate mon0 if not
-#ifconfig mon0 >/dev/null 2>&1
+# activate $MONITOR if not
+#ifconfig $MONITOR >/dev/null 2>&1
 #if [ $? -ne 0 ]; then
-ip link show mon0 | grep -i down >/dev/null 2>&1
+ip link show $MONITOR | grep -i down >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "Activating monitor interface"
-    #ifconfig mon0 up
-    ip link set mon0 up
-    #ifconfig mon0 >/dev/null 2>&1
+    #ifconfig $MONITOR up
+    ip link set $MONITOR up
+    #ifconfig $MONITOR >/dev/null 2>&1
     #while [ $? -ne 0 ]
-    ip link show mon0 | grep -i down >/dev/null 2>&1
+    ip link show $MONITOR | grep -i down >/dev/null 2>&1
     while [ $? -eq 0 ]
     do
-        #ifconfig mon0 >/dev/null 2>&1
-        ip link show mon0 | grep -i down >/dev/null 2>&1
+        #ifconfig $MONITOR >/dev/null 2>&1
+        ip link show $MONITOR | grep -i down >/dev/null 2>&1
     done
 fi
 
@@ -59,13 +62,15 @@ fi
 
 # set channel and frequency
 channel=$(./channel.sh)
-if [ "$channel" -ne $1 ]; then
+if [ "$channel" -ne $CHANNEL ]; then
     echo "Setting channel and frequency"
-    iw dev mon0 set channel $1 $2
+    iw dev $MONITOR set channel $CHANNEL $MODE
     channel=$(./channel.sh)
-    while [ "$channel" -ne 1 ]
+    while [ "$channel" -ne $CHANNEL ]
     do
-        :
+        sleep 1
+        iw dev $MONITOR set channel $CHANNEL $MODE
+        channel=$(./channel.sh)
     done
 fi
 echo "Setup done"
