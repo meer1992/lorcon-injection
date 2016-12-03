@@ -9,6 +9,6 @@ all: $(ALL)
 clean:
 	rm -f *.o $(ALL)
 
-random_packets: inject.c util.o
+inject: inject.c util.o
 
 util.c: util.h
