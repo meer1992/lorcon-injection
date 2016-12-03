@@ -1,4 +1,9 @@
 freq=$(iwconfig mon0 | sed -n -r 's/.*(2\.[0-9]{3}).*/\1/p')
+if [ -z "$freq" ];
+then
+    echo -1
+    exit
+fi
 freqMHz=$(echo "1000*$freq" | bc)
 
 band24=$(echo "$freqMHz<2500" | bc)
