@@ -73,5 +73,6 @@ if [ "$channel" -ne $CHANNEL ]; then
         channel=$(./channel.sh)
     done
 fi
+
 echo "Setup done"
 
