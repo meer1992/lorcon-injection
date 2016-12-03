@@ -65,14 +65,20 @@ channel=$(./channel.sh)
 if [ "$channel" -ne $CHANNEL ]; then
     echo "Setting channel and frequency"
     iw dev $MONITOR set channel $CHANNEL $MODE
-    channel=$(./channel.sh)
-    while [ "$channel" -ne $CHANNEL ]
+    #channel=$(./channel.sh)
+    #while [ "$channel" -ne $CHANNEL ]
+    while [ $(channel $MONITOR) -ne $CHANNEL ]
     do
         sleep 1
         iw dev $MONITOR set channel $CHANNEL $MODE
-        channel=$(./channel.sh)
+        #channel=$(./channel.sh)
     done
 fi
 
 echo "Setup done"
+
+function channel(){
+    freq=$(iw dev $1 info | sed -n -r 's/.*channel ([0-9]{1,3}).*/\1/p')
+    echo $freq
+}
 
