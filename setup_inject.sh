@@ -61,13 +61,14 @@ if [ $? -eq 0 ]; then
 fi
 
 # set channel and frequency
-channel=$(./channel.sh)
+channel=$(./channel.sh $MONITOR)
 if [ "$channel" -ne $CHANNEL ]; then
     echo "Setting channel and frequency"
     iw dev $MONITOR set channel $CHANNEL $MODE
     #channel=$(./channel.sh)
     #while [ "$channel" -ne $CHANNEL ]
-    while [ $(channel $MONITOR) -ne $CHANNEL ]
+    #while [ $(channel $MONITOR) -ne $CHANNEL ]
+    while [ $(./channel.sh $MONITOR) -ne $CHANNEL ]
     do
         sleep 1
         iw dev $MONITOR set channel $CHANNEL $MODE
